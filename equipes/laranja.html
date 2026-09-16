@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipe Laranja — Arquivo</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .maps-link {
+      display: inline-block;
+      padding: 12px 25px;
+      background: linear-gradient(135deg, var(--laranja) 0%, #c77828 100%);
+      color: #1a1a1a;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(230, 145, 56, 0.4);
+      font-size: 0.95em;
+    }
+    .maps-link:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 25px rgba(230, 145, 56, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <div class="container equipe-laranja">
+    <h1>🟠 Equipe Laranja</h1>
+  </div>
+
+  <script src="../assets/config.js"></script>
+  <script src="../assets/access.js"></script>
+  <script src="../assets/location-puzzle.js"></script>
+  <script>
+    ARG_ACCESS.requireTeam('laranja');
+    ARG_LOCATION_PUZZLE.mount({ team: 'laranja', coordinates: ARG_CONFIG.coordenadas.laranja });
+  </script>
+</body>
+</html>

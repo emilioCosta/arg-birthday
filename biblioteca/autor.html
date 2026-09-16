@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arquivo de Autor - A Birita Desaparecida</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <main class="biblioteca-container perfil-autor">
+    <a class="perfil-voltar" id="voltarBiblioteca" href="dupla1.html">Voltar para a biblioteca</a>
+    <section class="perfil-cabecalho">
+      <div class="perfil-retrato-bloco">
+        <div class="perfil-foto" id="retratoContainer">
+          <img id="retratoAutor" alt="" loading="eager">
+        </div>
+        <a class="perfil-instagram" id="instagramLink" target="_blank" rel="noopener noreferrer" aria-label="Abrir Instagram">
+          <img src="https://cdn.simpleicons.org/instagram/3D4852" alt="" aria-hidden="true"> Instagram
+        </a>
+      </div>
+      <div>
+        <p class="subtitle">Arquivo de autor</p>
+        <h1 id="autorNome">Carregando arquivo...</h1>
+        <p id="autorDescricao">Buscando o registro do acervo.</p>
+      </div>
+    </section>
+
+    <section class="perfil-conteudo">
+      <article class="perfil-secao">
+        <div class="perfil-obra-imagem" id="obraImagemContainer">
+          <img id="obraImagem" alt="Capa da obra em destaque" loading="lazy">
+        </div>
+        <div class="perfil-obra-texto">
+          <h2 id="obraTitulo">Obra em destaque</h2>
+          <p id="obraDescricao"></p>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script src="../assets/config.js"></script>
+  <script src="../assets/access.js"></script>
+  <script>
+    const duplaAtual = sessionStorage.getItem('arg_library');
+    const autor = new URLSearchParams(window.location.search).get('autor');
+
+    if (!duplaAtual || !ARG_CONFIG.duplas[duplaAtual] || !ARG_CONFIG.autoresBiblioteca.includes(autor)) {
+      window.location.replace('../index.html?acesso=necessario');
+    } else {
+      const dadosAutor = ARG_CONFIG.livrosConteudo[autor];
+      const obra = dadosAutor ? dadosAutor.paginas[0] : null;
+      const isAutorChave = autor === ARG_CONFIG.duplas[duplaAtual].autorChave;
+      const instagramDestino = isAutorChave ? ARG_CONFIG.duplas[duplaAtual].instagram : ARG_CONFIG.instagramDistracao;
+      const paginaWikipedia = ARG_CONFIG.autoresFotos[autor];
+
+      document.title = `${autor} - Arquivo de Autor`;
+      document.getElementById('voltarBiblioteca').href = `${duplaAtual}.html`;
+      document.getElementById('autorNome').textContent = autor;
+      document.getElementById('obraTitulo').textContent = obra ? obra.titulo : 'Arquivo em catalogacao';
+      document.getElementById('obraDescricao').textContent = obra ? obra.conteudo : 'Este arquivo nao contem uma obra em destaque.';
+      document.getElementById('instagramLink').href = instagramDestino;
+
+      function esconder(containerId) {
+        document.getElementById(containerId).hidden = true;
+      }
+
+      fetch(`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(paginaWikipedia)}`)
+        .then(function(resposta) { return resposta.ok ? resposta.json() : null; })
+        .then(function(dados) {
+          if (!dados) return;
+          document.getElementById('autorDescricao').textContent = dados.extract || 'Registro biografico indisponivel.';
+          if (dados.thumbnail) {
+            document.getElementById('retratoAutor').src = dados.thumbnail.source;
+            document.getElementById('retratoAutor').alt = `Retrato de ${autor}`;
+          } else {
+            esconder('retratoContainer');
+          }
+        })
+        .catch(function() { esconder('retratoContainer'); });
+
+      if (obra) {
+        fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(obra.titulo)}&author=${encodeURIComponent(autor)}&limit=1`)
+          .then(function(resposta) { return resposta.ok ? resposta.json() : null; })
+          .then(function(dados) {
+            const capa = dados && dados.docs && dados.docs[0] && dados.docs[0].cover_i;
+            if (capa) {
+              document.getElementById('obraImagem').src = `https://covers.openlibrary.org/b/id/${capa}-L.jpg`;
+            } else {
+              esconder('obraImagemContainer');
+            }
+          })
+          .catch(function() { esconder('obraImagemContainer'); });
+      } else {
+        esconder('obraImagemContainer');
+      }
+    }
+  </script>
+</body>
+</html>

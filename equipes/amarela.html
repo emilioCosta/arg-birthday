@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipe Amarela — Arquivo</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .maps-link {
+      display: inline-block;
+      padding: 12px 25px;
+      background: linear-gradient(135deg, var(--amarela) 0%, #c9a823 100%);
+      color: #1a1a1a;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(241, 194, 50, 0.4);
+      font-size: 0.95em;
+    }
+    .maps-link:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 25px rgba(241, 194, 50, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <div class="container equipe-amarela">
+    <h1>🟡 Equipe Amarela</h1>
+  </div>
+
+  <script src="../assets/config.js"></script>
+  <script src="../assets/access.js"></script>
+  <script src="../assets/location-puzzle.js"></script>
+  <script>
+    ARG_ACCESS.requireTeam('amarela');
+    ARG_LOCATION_PUZZLE.mount({ team: 'amarela', coordinates: ARG_CONFIG.coordenadas.amarela });
+  </script>
+</body>
+</html>

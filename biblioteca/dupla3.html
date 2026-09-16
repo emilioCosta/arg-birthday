@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biblioteca de Autores — Dupla 3</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .decoration {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      background: var(--bg-base);
+      transition: all 500ms ease-out;
+    }
+    
+    .decoration-1 {
+      width: 320px;
+      height: 320px;
+      top: 12%;
+      right: 10%;
+      box-shadow: 9px 9px 16px var(--shadow-dark), -9px -9px 16px var(--shadow-light);
+      animation: float 8.5s ease-in-out infinite;
+    }
+    
+    .decoration-2 {
+      width: 220px;
+      height: 220px;
+      bottom: 15%;
+      left: 12%;
+      box-shadow: inset 8px 8px 16px var(--shadow-dark), inset -8px -8px 16px var(--shadow-light);
+      animation: float 11s ease-in-out infinite 2.5s;
+    }
+  </style>
+</head>
+<body>
+  <div class="decoration decoration-1"></div>
+  <div class="decoration decoration-2"></div>
+  <div class="biblioteca-container">
+    <div class="biblioteca-header">
+      <h1>📚 Biblioteca de Autores</h1>
+      <p style="color: var(--text-secondary); margin-top: 15px;">
+        A biblioteca guarda muitas pistas.<br>
+        Um único autor conhece o caminho adiante.
+      </p>
+    </div>
+    
+    <div class="estante" id="estante"></div>
+    
+    <div style="text-align: center; margin-top: 40px; color: var(--text-secondary); font-style: italic;">
+      "Nem todos os livros revelam onde está a garrafa..."
+    </div>
+  </div>
+
+  <!-- Leitor de livro (modal) -->
+  <div class="livro-leitor" id="livroLeitor">
+    <div class="livro-conteudo">
+      <div class="livro-header">
+        <h2 id="livroTitulo"></h2>
+        <button class="livro-fechar" id="livroFechar">&times;</button>
+      </div>
+      
+      <div class="livro-paginas" id="livroPaginas"></div>
+      
+      <div class="livro-controles">
+        <div class="livro-nav">
+          <button id="btnAnterior">← Anterior</button>
+          <button id="btnProxima">Próxima →</button>
+        </div>
+        <div class="pagina-numero" id="paginaNumero"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/config.js"></script>
+  <script src="../assets/access.js"></script>
+  <script>
+    const duplaAtual = 'dupla3';
+    ARG_ACCESS.requireLibrary(duplaAtual, ['laranja', 'vermelha']);
+    const autores = [...ARG_CONFIG.autoresBiblioteca].sort(function() {
+      return Math.random() - 0.5;
+    });
+    const autorChave = ARG_CONFIG.duplas[duplaAtual].autorChave;
+    const instagramLink = ARG_CONFIG.duplas[duplaAtual].instagram;
+    const livrosConteudo = ARG_CONFIG.livrosConteudo;
+    const autoresFotos = ARG_CONFIG.autoresFotos;
+    
+    const estante = document.getElementById('estante');
+    const livroLeitor = document.getElementById('livroLeitor');
+    const livroTitulo = document.getElementById('livroTitulo');
+    const livroPaginas = document.getElementById('livroPaginas');
+    const livroFechar = document.getElementById('livroFechar');
+    const btnAnterior = document.getElementById('btnAnterior');
+    const btnProxima = document.getElementById('btnProxima');
+    const paginaNumero = document.getElementById('paginaNumero');
+    
+    let paginaAtual = 0;
+    let totalPaginas = 0;
+    let autorAtual = '';
+    
+    // Criar livros na estante
+    autores.forEach(function(autor) {
+      const livro = document.createElement('div');
+      livro.className = 'livro';
+      livro.innerHTML = `
+        <div class="livro-retrato"><img alt="Retrato de ${autor}" loading="lazy"></div>
+        <div class="livro-titulo">${autor}</div>
+        <div class="livro-autor">Literatura Brasileira</div>
+      `;
+      carregarRetrato(livro.querySelector('img'), autor);
+      
+      livro.addEventListener('click', function() {
+        window.location.href = `autor.html?autor=${encodeURIComponent(autor)}`;
+      });
+      
+      estante.appendChild(livro);
+    });
+
+    function carregarRetrato(imagem, autor) {
+      const pagina = autoresFotos[autor];
+      if (!pagina) {
+        imagem.parentElement.hidden = true;
+        return;
+      }
+
+      fetch(`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(pagina)}`)
+        .then(function(resposta) { return resposta.ok ? resposta.json() : null; })
+        .then(function(dados) {
+          if (!dados || !dados.thumbnail) {
+            imagem.parentElement.hidden = true;
+            return;
+          }
+          imagem.src = dados.thumbnail.source;
+        })
+        .catch(function() { imagem.parentElement.hidden = true; });
+    }
+    
+    function abrirLivro(autor) {
+      autorAtual = autor;
+      livroTitulo.textContent = autor;
+      paginaAtual = 0;
+      
+      const isAutorChave = autor === autorChave;
+      
+      if (livrosConteudo[autor]) {
+        const paginas = livrosConteudo[autor].paginas;
+        totalPaginas = paginas.length;
+        const instagramDestino = isAutorChave ? instagramLink : ARG_CONFIG.instagramDistracao;
+        
+        livroPaginas.innerHTML = '';
+        
+        paginas.forEach(function(pag, index) {
+          const paginaDiv = document.createElement('div');
+          paginaDiv.className = 'pagina';
+          if (index === 0) paginaDiv.classList.add('ativa');
+          paginaDiv.innerHTML = `
+            <h3>${pag.titulo}</h3>
+            <p>${pag.conteudo}</p>
+            ${index === paginas.length - 1 ? `
+              <div class="arquivo-referencia">
+                <span class="arquivo-referencia-marca" aria-hidden="true">@</span>
+                <div class="arquivo-referencia-conteudo">
+                  <span class="arquivo-referencia-label">Arquivo relacionado</span>
+                  <a href="${instagramDestino}" target="_blank" rel="noopener noreferrer" class="arquivo-referencia-link">Ver registro visual no Instagram</a>
+                </div>
+              </div>
+            ` : ''}
+          `;
+          livroPaginas.appendChild(paginaDiv);
+        });
+      } else {
+        totalPaginas = 1;
+        livroPaginas.innerHTML = `
+          <div class="pagina ativa">
+            <h3>${autor}</h3>
+            <p>Este não é o autor que procuram.</p>
+            <p style="font-style: italic; color: #888; text-indent: 0; margin-top: 30px;">
+              A busca continua...
+            </p>
+          </div>
+        `;
+      }
+      
+      livroLeitor.classList.add('show');
+      atualizarControles();
+    }
+    
+    function atualizarControles() {
+      const paginas = livroPaginas.querySelectorAll('.pagina');
+      
+      paginas.forEach(function(pag, index) {
+        pag.classList.toggle('ativa', index === paginaAtual);
+      });
+      
+      btnAnterior.disabled = paginaAtual === 0;
+      btnProxima.disabled = paginaAtual >= totalPaginas - 1;
+      
+      paginaNumero.textContent = `Página ${paginaAtual + 1} de ${totalPaginas}`;
+    }
+    
+    btnAnterior.addEventListener('click', function() {
+      if (paginaAtual > 0) {
+        paginaAtual--;
+        atualizarControles();
+      }
+    });
+    
+    btnProxima.addEventListener('click', function() {
+      if (paginaAtual < totalPaginas - 1) {
+        paginaAtual++;
+        atualizarControles();
+      }
+    });
+    
+    livroFechar.addEventListener('click', function() {
+      livroLeitor.classList.remove('show');
+    });
+    
+    livroLeitor.addEventListener('click', function(e) {
+      if (e.target === livroLeitor) {
+        livroLeitor.classList.remove('show');
+      }
+    });
+  </script>
+</body>
+</html>

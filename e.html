@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Birita Desaparecida - Pista</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="container" id="arquivo">
+    <h1 id="titulo">Pista da equipe</h1>
+    <p class="subtitle">A birita desaparecida</p>
+    <p id="mensagem">Validando a chave do arquivo...</p>
+  </div>
+  <a id="libraryLink" class="library-link" aria-label="Abrir biblioteca da dupla" title="Abrir biblioteca da dupla" hidden>📚</a>
+
+  <script src="assets/config.js"></script>
+  <script src="assets/access.js"></script>
+  <script src="assets/location-puzzle.js"></script>
+  <script>
+    const chave = new URLSearchParams(window.location.search).get('chave');
+    const equipe = ARG_ACCESS.resolveTeam(chave);
+
+    if (!equipe || sessionStorage.getItem('arg_team') !== equipe) {
+      window.location.replace('index.html?acesso=necessario');
+    } else {
+      const coordenadas = ARG_CONFIG.coordenadas[equipe];
+      const nomeEquipe = equipe.charAt(0).toUpperCase() + equipe.slice(1);
+      const titulo = document.getElementById('titulo');
+      const mensagem = document.getElementById('mensagem');
+      const libraryLink = document.getElementById('libraryLink');
+      const duplasPorEquipe = {
+        azul: 'dupla1',
+        verde: 'dupla1',
+        amarela: 'dupla2',
+        roxa: 'dupla2',
+        laranja: 'dupla3',
+        vermelha: 'dupla3'
+      };
+
+      document.title = `Equipe ${nomeEquipe} - Arquivo`;
+      titulo.textContent = `Equipe ${nomeEquipe}`;
+      mensagem.innerHTML = '';
+      libraryLink.href = `biblioteca/${duplasPorEquipe[equipe]}.html`;
+      libraryLink.hidden = false;
+
+      if (coordenadas && !coordenadas.includes('PREENCHER')) {
+        ARG_LOCATION_PUZZLE.mount({ team: equipe, coordinates: coordenadas });
+      }
+    }
+  </script>
+</body>
+</html>

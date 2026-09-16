@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Placar | A Birita Desaparecida</title>
+  <link rel="stylesheet" href="assets/dashboard.css">
+</head>
+<body>
+  <main class="dashboard-shell">
+    <header class="dashboard-header">
+      <div>
+        <p class="eyebrow">A Birita Desaparecida</p>
+        <h1>Placar do evento</h1>
+        <p class="header-note">Resultados ao vivo · <span id="statusText">nenhum jogo encerrado</span></p>
+      </div>
+      <div class="header-actions">
+        <button class="button button-secondary" id="refreshButton" type="button">Atualizar dados</button>
+        <button class="button button-danger" id="resetButton" type="button">Zerar placar</button>
+      </div>
+    </header>
+
+    <section class="scoreboard-section" aria-labelledby="rankingTitle">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Classificação geral</p>
+          <h2 id="rankingTitle">Quem está na frente?</h2>
+        </div>
+        <div class="points-legend" id="pointsLegend"></div>
+      </div>
+      <div class="ranking-grid" id="rankingGrid"></div>
+    </section>
+
+    <details class="setup-panel roster-panel">
+      <summary class="section-heading compact-heading">
+        <div>
+          <p class="eyebrow">Preparação do evento</p>
+          <h2>Participantes do evento</h2>
+        </div>
+        <span class="summary-hint">nomes das equipes <b>+</b></span>
+      </summary>
+      <div class="setup-block">
+        <div class="block-heading"><div><p class="eyebrow">Lista geral</p><h3 id="rosterTitle">Integrantes por equipe</h3></div><span id="rosterCount">0 nomes</span></div>
+        <p class="helper-text">Cole uma linha por pessoa no formato <strong>Equipe; Nome</strong>.</p>
+        <textarea id="rosterInput" rows="5" placeholder="Azul; Ana, Bruno, Camila\nVerde; Daniel, Elisa, Felipe"></textarea>
+        <div class="setup-actions"><label class="file-button" for="rosterFile">Importar arquivo .txt ou .csv<input id="rosterFile" type="file" accept=".txt,.csv,text/plain,text/csv"></label><button class="button button-primary" id="saveRoster" type="button">Salvar integrantes</button></div>
+        <p class="form-feedback" id="rosterFeedback" role="status"></p>
+        <div class="roster-list" id="rosterList"></div>
+      </div>
+    </details>
+
+    <section class="games-section" aria-labelledby="gamesTitle">
+      <div class="section-heading compact-heading"><div><p class="eyebrow">Preparação e resultados</p><h2 id="gamesTitle">Jogos do evento</h2></div><span class="helper-text">Abra cada jogo para escalar, organizar e finalizar.</span></div>
+      <div id="gameSections"></div>
+    </section>
+
+    <section class="results-section" aria-labelledby="resultsTitle">
+      <div class="section-heading compact-heading">
+        <div>
+          <p class="eyebrow">Controle das rodadas</p>
+          <h2 id="resultsTitle">Resultados registrados</h2>
+        </div>
+        <span class="round-count" id="roundCount">0/5 jogos</span>
+      </div>
+      <div class="results-list" id="resultsList"></div>
+    </section>
+  </main>
+  <script src="assets/config.js"></script>
+  <script src="assets/dashboard.js"></script>
+</body>
+</html>

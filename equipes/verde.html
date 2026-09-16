@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipe Verde — Arquivo</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .maps-link {
+      display: inline-block;
+      padding: 12px 25px;
+      background: linear-gradient(135deg, var(--verde) 0%, #2a5c18 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(56, 118, 29, 0.4);
+      font-size: 0.95em;
+    }
+    .maps-link:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 25px rgba(56, 118, 29, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <div class="container equipe-verde">
+    <h1>🟢 Equipe Verde</h1>
+  </div>
+
+  <script src="../assets/config.js"></script>
+  <script src="../assets/access.js"></script>
+  <script src="../assets/location-puzzle.js"></script>
+  <script>
+    ARG_ACCESS.requireTeam('verde');
+    ARG_LOCATION_PUZZLE.mount({ team: 'verde', coordinates: ARG_CONFIG.coordenadas.verde });
+  </script>
+</body>
+</html>

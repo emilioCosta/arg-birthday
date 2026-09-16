@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipe Roxa — Arquivo</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .maps-link {
+      display: inline-block;
+      padding: 12px 25px;
+      background: linear-gradient(135deg, var(--roxa) 0%, #523d85 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(103, 78, 167, 0.4);
+      font-size: 0.95em;
+    }
+    .maps-link:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 25px rgba(103, 78, 167, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <div class="container equipe-roxa">
+    <h1>🟣 Equipe Roxa</h1>
+  </div>
+
+  <script src="../assets/config.js"></script>
+  <script src="../assets/access.js"></script>
+  <script src="../assets/location-puzzle.js"></script>
+  <script>
+    ARG_ACCESS.requireTeam('roxa');
+    ARG_LOCATION_PUZZLE.mount({ team: 'roxa', coordinates: ARG_CONFIG.coordenadas.roxa });
+  </script>
+</body>
+</html>
