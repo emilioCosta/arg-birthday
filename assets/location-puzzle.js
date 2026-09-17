@@ -28,11 +28,14 @@ const ARG_LOCATION_PUZZLE = {
     const tiles = solved.slice();
     let emptyIndex = 15;
 
-    for (let move = 0; move < 80; move += 1) {
-      const neighbors = ARG_LOCATION_PUZZLE.neighbors(emptyIndex);
+    let previousEmptyIndex = -1;
+    for (let move = 0; move < 5000; move += 1) {
+      const neighbors = ARG_LOCATION_PUZZLE.neighbors(emptyIndex)
+        .filter(index => index !== previousEmptyIndex);
       const nextIndex = neighbors[Math.floor(Math.random() * neighbors.length)];
       tiles[emptyIndex] = tiles[nextIndex];
       tiles[nextIndex] = null;
+      previousEmptyIndex = emptyIndex;
       emptyIndex = nextIndex;
     }
 
@@ -115,7 +118,7 @@ const ARG_LOCATION_PUZZLE = {
     if (row > 0) result.push(index - 4);
     if (row < 3) result.push(index + 4);
     if (column > 0) result.push(index - 1);
-    if (column < 2) result.push(index + 1);
+    if (column < 3) result.push(index + 1);
     return result;
   },
 

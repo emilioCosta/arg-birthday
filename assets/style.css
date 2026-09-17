@@ -90,10 +90,10 @@ body {
 
 .puzzle-board {
   display: grid;
-  grid-template-columns: repeat(4, minmax(48px, 64px));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
   justify-content: center;
-  width: min(100%, 244px);
+  width: min(100%, 256px);
   margin: 0 auto 14px;
   aspect-ratio: 1;
   overflow: hidden;
@@ -103,6 +103,8 @@ body {
 }
 
 .puzzle-tile {
+  width: 100%;
+  min-width: 0;
   aspect-ratio: 1;
   padding: 0;
   border-radius: 12px;
