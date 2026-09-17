@@ -9,14 +9,11 @@ const ARG_LOCATION_PUZZLE = {
     root.innerHTML = `
       <h2>Monte a pista</h2>
       <p class="puzzle-instruction">Reorganize o doodle e revele o próximo destino.</p>
-      <div class="puzzle-board" role="group" aria-label="Quebra-cabeça deslizante"></div>
+      <div class="puzzle-board" role="group" aria-label="Quebra-cabeça deslizante 4 por 4"></div>
       <p class="puzzle-status" aria-live="polite">Toque em uma peça ao lado do espaço vazio.</p>
-      <button type="button" class="puzzle-solve-temporary">Deixar a 3 movimentos (temporário)</button>
       <div class="puzzle-reward" hidden>
         <p>A passagem foi reconstruída.</p>
-        <a class="maps-link" target="_blank" rel="noopener">
-          Abrir localização no Google Maps
-        </a>
+        <p class="coordinates-output"></p>
       </div>
     `;
     const container = document.querySelector('.container');
@@ -26,11 +23,10 @@ const ARG_LOCATION_PUZZLE = {
     const board = root.querySelector('.puzzle-board');
     const status = root.querySelector('.puzzle-status');
     const reward = root.querySelector('.puzzle-reward');
-    const mapsLink = reward.querySelector('.maps-link');
-    const temporarySolveButton = root.querySelector('.puzzle-solve-temporary');
-    const solved = [0, 1, 2, 3, 4, 5, 6, 7, null];
+    const coordinatesOutput = reward.querySelector('.coordinates-output');
+    const solved = Array.from({ length: 16 }, (_, index) => index === 15 ? null : index);
     const tiles = solved.slice();
-    let emptyIndex = 8;
+    let emptyIndex = 15;
 
     for (let move = 0; move < 80; move += 1) {
       const neighbors = ARG_LOCATION_PUZZLE.neighbors(emptyIndex);
@@ -55,10 +51,10 @@ const ARG_LOCATION_PUZZLE = {
         button.className = tile === null ? 'puzzle-tile puzzle-empty' : 'puzzle-tile';
         button.setAttribute('aria-label', tile === null ? 'Espaço vazio' : `Trecho ${tile + 1} do doodle`);
         if (tile !== null) {
-          const row = Math.floor(tile / 3);
-          const column = tile % 3;
-          button.style.setProperty('--tile-position-x', `${column * 50}%`);
-          button.style.setProperty('--tile-position-y', `${row * 50}%`);
+          const row = Math.floor(tile / 4);
+          const column = tile % 4;
+          button.style.setProperty('--tile-position-x', `${column * 33.3333}%`);
+          button.style.setProperty('--tile-position-y', `${row * 33.3333}%`);
           button.addEventListener('click', () => moveTile(index));
         }
         board.appendChild(button);
@@ -85,10 +81,20 @@ const ARG_LOCATION_PUZZLE = {
 
     function finishPuzzle() {
       tiles.splice(0, tiles.length, ...solved);
-      emptyIndex = 8;
+      emptyIndex = 15;
       render();
       status.hidden = true;
-      mapsLink.href = `https://www.google.com/maps/search/?api=1&query=${coordinates}`;
+      const [latitude, longitude] = coordinates.split(',').map(value => value.trim());
+      coordinatesOutput.replaceChildren();
+      [
+        ['Latitude', latitude],
+        ['Longitude', longitude]
+      ].forEach(([label, value]) => {
+        const item = document.createElement('span');
+        item.className = 'coordinate-item';
+        item.innerHTML = `<small>${label}</small><strong>${value}</strong>`;
+        coordinatesOutput.appendChild(item);
+      });
       reward.hidden = false;
       board.setAttribute('aria-hidden', 'true');
       board.hidden = true;
@@ -96,43 +102,18 @@ const ARG_LOCATION_PUZZLE = {
       board.querySelectorAll('button').forEach(button => {
         button.disabled = true;
       });
-      temporarySolveButton.hidden = true;
       ARG_LOCATION_PUZZLE.celebrate();
     }
-
-    function leaveThreeMovesAway() {
-      tiles.splice(0, tiles.length, ...solved);
-      emptyIndex = 8;
-      let previousEmptyIndex = -1;
-
-      for (let move = 0; move < 3; move += 1) {
-        const options = ARG_LOCATION_PUZZLE.neighbors(emptyIndex)
-          .filter(index => index !== previousEmptyIndex);
-        const nextIndex = options[Math.floor(Math.random() * options.length)];
-        tiles[emptyIndex] = tiles[nextIndex];
-        tiles[nextIndex] = null;
-        previousEmptyIndex = emptyIndex;
-        emptyIndex = nextIndex;
-      }
-
-      reward.hidden = true;
-      mapsLink.removeAttribute('href');
-      board.removeAttribute('aria-hidden');
-      status.textContent = 'Faltam 3 movimentos para reconstruir a pista.';
-      render();
-    }
-
-    temporarySolveButton.addEventListener('click', leaveThreeMovesAway);
 
     render();
   },
 
   neighbors(index) {
-    const row = Math.floor(index / 3);
-    const column = index % 3;
+    const row = Math.floor(index / 4);
+    const column = index % 4;
     const result = [];
-    if (row > 0) result.push(index - 3);
-    if (row < 2) result.push(index + 3);
+    if (row > 0) result.push(index - 4);
+    if (row < 3) result.push(index + 4);
     if (column > 0) result.push(index - 1);
     if (column < 2) result.push(index + 1);
     return result;

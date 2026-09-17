@@ -90,7 +90,7 @@ body {
 
 .puzzle-board {
   display: grid;
-  grid-template-columns: repeat(3, minmax(56px, 76px));
+  grid-template-columns: repeat(4, minmax(48px, 64px));
   gap: 0;
   justify-content: center;
   width: min(100%, 244px);
@@ -109,7 +109,7 @@ body {
   border: 1px solid rgba(61, 72, 82, 0.55);
   background-color: #f7f7f2;
   background-image: url('doodle.jpg');
-  background-size: 300% 300%;
+  background-size: 400% 400%;
   background-position: var(--tile-position-x) var(--tile-position-y);
   cursor: pointer;
   box-shadow: none;
@@ -132,25 +132,6 @@ body {
 
 .puzzle-reward[hidden] {
   display: none;
-}
-
-.puzzle-solve-temporary {
-  width: auto;
-  margin: 0 auto 16px;
-  padding: 9px 14px;
-  background: transparent;
-  color: var(--text-muted);
-  border: 1px dashed var(--text-muted);
-  border-radius: 8px;
-  box-shadow: none;
-  font-size: 0.75em;
-  letter-spacing: 0;
-  text-transform: none;
-}
-
-.puzzle-solve-temporary:hover {
-  box-shadow: none;
-  color: var(--text-primary);
 }
 
 .confetti-layer {
@@ -187,6 +168,42 @@ body {
   margin-bottom: 12px;
   color: var(--text-primary);
   font-weight: 600;
+}
+
+.coordinates-output {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.coordinate-item {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 13px 14px;
+  border: 1px solid rgba(61, 72, 82, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.28);
+  text-align: left;
+  box-shadow: inset 2px 2px 5px rgba(163, 177, 198, 0.22), inset -2px -2px 5px rgba(255, 255, 255, 0.32);
+}
+
+.coordinate-item small {
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 0.7em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.coordinate-item strong {
+  overflow-wrap: anywhere;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 0.95em;
+  letter-spacing: 0.02em;
 }
 
 .library-link {
@@ -1259,6 +1276,10 @@ button:disabled {
 
   .livro-autor {
     font-size: 0.78em;
+  }
+
+  .coordinates-output {
+    grid-template-columns: 1fr;
   }
 
   .livro-header h2 {
