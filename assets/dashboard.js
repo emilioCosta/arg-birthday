@@ -135,7 +135,20 @@
       const match = function (first, second, key) { const winner = gameResults[key]; return "<div class=\"match\"><button type=\"button\" class=\"match-pill" + (winner === first ? " selected" : "") + "\" style=\"--team-color:" + teamColors[first] + "\" data-bracket-game=\"" + game.id + "\" data-bracket-key=\"" + key + "\" data-bracket-team=\"" + first + "\"><strong>" + teamLabel(first) + "</strong><small>" + participantsFor(first) + "</small></button><b class=\"match-x\">×</b><button type=\"button\" class=\"match-pill" + (winner === second ? " selected" : "") + "\" style=\"--team-color:" + teamColors[second] + "\" data-bracket-game=\"" + game.id + "\" data-bracket-key=\"" + key + "\" data-bracket-team=\"" + second + "\"><strong>" + teamLabel(second) + "</strong><small>" + participantsFor(second) + "</small></button></div>"; };
       const finalOrder = function (finalTeams) { return orderFor("ordem-final", finalTeams); };
       const standings = function (groupTeams, prefix) { return groupTeams.slice().sort(function (a, b) { return (gameResults[prefix + "-" + b] || 0) - (gameResults[prefix + "-" + a] || 0); }).map(function (team, index) { return "<div class=\"standing-row\"><b>" + (index + 1) + "º</b><strong>" + teamLabel(team) + "</strong><span>" + (gameResults[prefix + "-" + team] || 0) + " vitórias</span></div>"; }).join(""); };
-      const winnerOf = function (groupTeams, prefix) { return groupTeams.slice().sort(function (a, b) { return (gameResults[prefix + "-" + b] || 0) - (gameResults[prefix + "-" + a] || 0); })[0]; };
+      const tieBreak = function (groupTeams, prefix) {
+        const wins = groupTeams.map(function (team) { return gameResults[prefix + "-" + team] || 0; });
+        const highestWins = Math.max.apply(null, wins);
+        const tiedTeams = groupTeams.filter(function (team) { return (gameResults[prefix + "-" + team] || 0) === highestWins; });
+        if (highestWins < 1 || tiedTeams.length < 2 || gameResults["desempate-" + prefix]) return "";
+        return "<div class=\"tie-break\"><b>Empate no grupo</b><span>Faça o dois ou um e marque quem avança:</span><div>" + tiedTeams.map(function (team) { return "<button type=\"button\" class=\"match-pill\" style=\"--team-color:" + teamColors[team] + "\" data-tiebreak-game=\"" + game.id + "\" data-tiebreak-key=\"desempate-" + prefix + "\" data-tiebreak-team=\"" + team + "\"><strong>Equipe " + teamLabel(team) + " avança</strong></button>"; }).join("") + "</div></div>";
+      };
+      const tieBreakComplete = function (groupTeams, prefix) {
+        const wins = groupTeams.map(function (team) { return gameResults[prefix + "-" + team] || 0; });
+        const highestWins = Math.max.apply(null, wins);
+        const tiedTeams = groupTeams.filter(function (team) { return (gameResults[prefix + "-" + team] || 0) === highestWins; });
+        return highestWins < 1 || tiedTeams.length < 2 || Boolean(gameResults["desempate-" + prefix]);
+      };
+      const winnerOf = function (groupTeams, prefix) { return gameResults["desempate-" + prefix] || groupTeams.slice().sort(function (a, b) { return (gameResults[prefix + "-" + b] || 0) - (gameResults[prefix + "-" + a] || 0); })[0]; };
       let visual;
       let typeLabel;
       if (game.chaveamento === "grupos-final-4") {
@@ -149,9 +162,9 @@
         typeLabel = "3 confrontos por grupo → final";
         const championA = winnerOf(teams.slice(0, 3), "a");
         const championB = winnerOf(teams.slice(3), "b");
-        const groupsComplete = ["a-1", "a-2", "a-3", "b-1", "b-2", "b-3"].every(function (key) { return gameResults[key]; });
+        const groupsComplete = ["a-1", "a-2", "a-3", "b-1", "b-2", "b-3"].every(function (key) { return gameResults[key]; }) && tieBreakComplete(teams.slice(0, 3), "a") && tieBreakComplete(teams.slice(3), "b");
         const finalMatch = function (first, second) { return "<div class=\"final-match\"><span class=\"stage-label\">FINAL · clique no campeão</span><button type=\"button\" class=\"match-pill" + (gameResults.final === first ? " selected" : "") + "\" style=\"--team-color:" + teamColors[first] + "\" data-bracket-game=\"" + game.id + "\" data-bracket-key=\"final\" data-bracket-team=\"" + first + "\"><strong>" + teamLabel(first) + "</strong><small>" + participantsFor(first) + "</small></button><b class=\"match-x\">×</b><button type=\"button\" class=\"match-pill" + (gameResults.final === second ? " selected" : "") + "\" style=\"--team-color:" + teamColors[second] + "\" data-bracket-game=\"" + game.id + "\" data-bracket-key=\"final\" data-bracket-team=\"" + second + "\"><strong>" + teamLabel(second) + "</strong><small>" + participantsFor(second) + "</small></button></div>"; };
-        visual = "<div class=\"bracket-flow bracket-groups\"><div class=\"group-pair\"><div class=\"bracket-column matches-column\"><span class=\"heat-label\">Grupo A · clique na vencedora</span>" + match("azul", "verde", "a-1") + match("azul", "amarela", "a-2") + match("verde", "amarela", "a-3") + "<div class=\"standings\"><b>Classificação</b>" + standings(teams.slice(0, 3), "a") + "</div></div><div class=\"bracket-column matches-column\"><span class=\"heat-label\">Grupo B · clique na vencedora</span>" + match("roxa", "laranja", "b-1") + match("roxa", "vermelha", "b-2") + match("laranja", "vermelha", "b-3") + "<div class=\"standings\"><b>Classificação</b>" + standings(teams.slice(3), "b") + "</div></div></div><div class=\"bracket-arrow\">→</div><div class=\"final-column\">" + (groupsComplete ? finalMatch(championA, championB) : "<span class=\"stage-label\">FINAL</span><div class=\"final-slot\"><strong>Campeões dos grupos</strong><small>conclua os 6 confrontos acima</small></div>") + "</div></div>";
+        visual = "<div class=\"bracket-flow bracket-groups\"><div class=\"group-pair\"><div class=\"bracket-column matches-column\"><span class=\"heat-label\">Grupo A · clique na vencedora</span>" + match("azul", "verde", "a-1") + match("azul", "amarela", "a-2") + match("verde", "amarela", "a-3") + "<div class=\"standings\"><b>Classificação</b>" + standings(teams.slice(0, 3), "a") + tieBreak(teams.slice(0, 3), "a") + "</div></div><div class=\"bracket-column matches-column\"><span class=\"heat-label\">Grupo B · clique na vencedora</span>" + match("roxa", "laranja", "b-1") + match("roxa", "vermelha", "b-2") + match("laranja", "vermelha", "b-3") + "<div class=\"standings\"><b>Classificação</b>" + standings(teams.slice(3), "b") + tieBreak(teams.slice(3), "b") + "</div></div></div><div class=\"bracket-arrow\">→</div><div class=\"final-column\">" + (groupsComplete ? finalMatch(championA, championB) : "<span class=\"stage-label\">FINAL</span><div class=\"final-slot\"><strong>Campeões dos grupos</strong><small>conclua os 6 confrontos acima e resolva os desempates</small></div>") + "</div></div>";
       } else {
         typeLabel = "bateria única com 6 equipes";
         const order = orderFor("ordem", teams);
@@ -209,7 +222,9 @@
   }
 
   function groupWins(team, gameResults) { return ["a-1", "a-2", "a-3", "b-1", "b-2", "b-3"].reduce(function (total, key) { return total + (gameResults[key] === team ? 1 : 0); }, 0); }
-  function winnerOfGroup(groupTeams, prefix, gameResults) { return groupTeams.slice().sort(function (a, b) { return groupWins(b, gameResults) - groupWins(a, gameResults); })[0]; }
+  function winnerOfGroup(groupTeams, prefix, gameResults) {
+    return gameResults["desempate-" + prefix] || groupTeams.slice().sort(function (a, b) { return groupWins(b, gameResults) - groupWins(a, gameResults); })[0];
+  }
 
   function render() {
     elements.pointsLegend.innerHTML = placementLabels.map(function (label, index) {
@@ -266,6 +281,16 @@
       render();
       return;
     }
+    const tieBreak = event.target.closest("[data-tiebreak-game][data-tiebreak-key][data-tiebreak-team]");
+    if (tieBreak) {
+      const gameId = tieBreak.dataset.tiebreakGame;
+      if (!bracketResults[gameId]) bracketResults[gameId] = {};
+      bracketResults[gameId][tieBreak.dataset.tiebreakKey] = tieBreak.dataset.tiebreakTeam;
+      saveBracketResults();
+      updateAutomaticResult(games.find(function (item) { return item.id === gameId; }));
+      render();
+      return;
+    }
     const option = event.target.closest("[data-bracket-game][data-bracket-key][data-bracket-team]");
     if (!option) return;
     const gameId = option.dataset.bracketGame;
@@ -281,6 +306,7 @@
     if (game.chaveamento === "todos-contra-todos-final" && /^(a|b)-\d+$/.test(key)) {
       const prefix = key.charAt(0);
       const groupTeams = prefix === "a" ? teams.slice(0, 3) : teams.slice(3);
+      delete gameResults["desempate-" + prefix];
       groupTeams.forEach(function (groupTeam) { delete gameResults[prefix + "-" + groupTeam]; });
       ["1", "2", "3"].forEach(function (matchNumber) {
         const winner = gameResults[prefix + "-" + matchNumber];
