@@ -15,11 +15,14 @@ const ARG_CONFIG = {
     { id: "arg", nome: "ARG", tipo: "arg", peso: 3, chaveamento: "bateria-unica", maxCompetidores: "todos" }
   ],
 
-  // A proporcao 8:5:3 e igual em todos os jogos; o peso aumenta a importancia da rodada.
+  // A pontuacao de colocacao e igual em todos os jogos; o peso aumenta a importancia da rodada.
   graduacaoJogos: {
     primeiro: 8,
-    segundo: 5,
-    terceiro: 3
+    segundo: 6,
+    terceiro: 4,
+    quarto: 3,
+    quinto: 2,
+    sexto: 1
   },
 
   // Mapeamento de códigos secretos para páginas das equipes

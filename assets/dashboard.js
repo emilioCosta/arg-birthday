@@ -39,6 +39,8 @@
   function saveBracketResults() { localStorage.setItem(BRACKET_RESULTS_KEY, JSON.stringify(bracketResults)); }
   function teamLabel(team) { return teamNames[team] || team; }
   function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, function (character) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]; }); }
+  const placementKeys = ["primeiro", "segundo", "terceiro", "quarto", "quinto", "sexto"];
+  const placementLabels = ["1º", "2º", "3º", "4º", "5º", "6º"];
   function pointsFor(game, placement) { return basePoints[placement] * game.peso; }
 
   function fillSelect(select) {
@@ -54,7 +56,7 @@
       if (!result || !result.finalized) return;
       result.placements.forEach(function (team, index) {
         const entry = totals.find(function (item) { return item.team === team; });
-        const placement = ["primeiro", "segundo", "terceiro"][index];
+        const placement = placementKeys[index];
         if (entry) { entry.total += pointsFor(game, placement); if (index === 0) entry.wins += 1; }
       });
     });
@@ -74,7 +76,7 @@
     elements.resultsList.innerHTML = games.map(function (game) {
       const result = results[game.id];
       if (!result || !result.finalized) return "<div class=\"result-row pending\"><span class=\"result-status\">○</span><strong>" + game.nome + "</strong><span class=\"pending-label\">" + (result ? "resultado preparado · não finalizado" : "aguardando resultado") + "</span></div>";
-      return "<div class=\"result-row\"><span class=\"result-status done\">✓</span><strong>" + game.nome + "</strong><span class=\"result-winners\"><b>1º " + teamLabel(result.placements[0]) + "</b><b>2º " + teamLabel(result.placements[1]) + "</b><b>3º " + teamLabel(result.placements[2]) + "</b></span><button class=\"edit-result\" type=\"button\" data-game=\"" + game.id + "\">Editar</button></div>";
+      return "<div class=\"result-row\"><span class=\"result-status done\">✓</span><strong>" + game.nome + "</strong><span class=\"result-winners\">" + result.placements.map(function (team, index) { return "<b>" + placementLabels[index] + " " + teamLabel(team) + "</b>"; }).join("") + "</span><button class=\"edit-result\" type=\"button\" data-game=\"" + game.id + "\">Editar</button></div>";
     }).join("");
   }
 
@@ -129,7 +131,7 @@
       const teamBlock = function (team, role, key) { const selected = gameResults[key] === team ? " selected" : ""; return "<button type=\"button\" class=\"bracket-team bracket-clickable" + selected + "\" data-bracket-game=\"" + game.id + "\" data-bracket-key=\"" + key + "\" data-bracket-team=\"" + team + "\" style=\"--team-color:" + teamColors[team] + "\"><i>" + teamLabel(team).charAt(0) + "</i><div><strong>" + (role ? role + " · " : "") + teamLabel(team) + "</strong><small>" + participantsFor(team) + "</small></div></button>"; };
       const orderFor = function (key, availableTeams) { const savedOrder = gameResults[key]; return savedOrder && savedOrder.length === availableTeams.length && savedOrder.every(function (team) { return availableTeams.includes(team); }) ? savedOrder : availableTeams; };
       const orderLane = function (label, key, availableTeams) { return "<div class=\"order-lane\"><span>" + label + "</span><div class=\"order-list\" data-order-game=\"" + game.id + "\" data-order-key=\"" + key + "\">" + orderFor(key, availableTeams).map(function (team, index) { return "<button type=\"button\" draggable=\"true\" class=\"order-team\" data-order-team=\"" + team + "\" style=\"--team-color:" + teamColors[team] + "\"><b>" + (index + 1) + "</b><i>" + teamLabel(team).charAt(0) + "</i><span><strong>" + teamLabel(team) + "</strong><small>" + participantsFor(team) + "</small></span><em>arraste</em></button>"; }).join("") + "</div></div>"; };
-      const finalSlots = function (slots) { return "<div class=\"final-column\"><span class=\"stage-label\">FINAL / COLOCAÇÃO</span>" + slots.map(function (slot) { const team = slot.team || gameResults[slot.key]; return team ? "<div class=\"final-slot filled\" style=\"--team-color:" + teamColors[team] + "\"><strong>" + slot.label + " · " + teamLabel(team) + "</strong><small>" + participantsFor(team) + "</small></div>" : "<div class=\"final-slot\"><strong>" + slot.label + "</strong><small>ordem ainda não definida</small></div>"; }).join("") + "</div>"; };
+      const finalSlots = function (slots) { return "<div class=\"final-column\"><span class=\"stage-label\">CLASSIFICAÇÃO FINAL</span>" + slots.map(function (slot) { const team = slot.team || gameResults[slot.key]; return team ? "<div class=\"final-slot filled\" style=\"--team-color:" + teamColors[team] + "\"><strong>" + slot.label + " · " + teamLabel(team) + "</strong><small>" + participantsFor(team) + "</small></div>" : "<div class=\"final-slot\"><strong>" + slot.label + "</strong><small>ordem ainda não definida</small></div>"; }).join("") + "</div>"; };
       const match = function (first, second, key) { const winner = gameResults[key]; return "<div class=\"match\"><button type=\"button\" class=\"match-pill" + (winner === first ? " selected" : "") + "\" style=\"--team-color:" + teamColors[first] + "\" data-bracket-game=\"" + game.id + "\" data-bracket-key=\"" + key + "\" data-bracket-team=\"" + first + "\"><strong>" + teamLabel(first) + "</strong><small>" + participantsFor(first) + "</small></button><b class=\"match-x\">×</b><button type=\"button\" class=\"match-pill" + (winner === second ? " selected" : "") + "\" style=\"--team-color:" + teamColors[second] + "\" data-bracket-game=\"" + game.id + "\" data-bracket-key=\"" + key + "\" data-bracket-team=\"" + second + "\"><strong>" + teamLabel(second) + "</strong><small>" + participantsFor(second) + "</small></button></div>"; };
       const finalOrder = function (finalTeams) { return orderFor("ordem-final", finalTeams); };
       const standings = function (groupTeams, prefix) { return groupTeams.slice().sort(function (a, b) { return (gameResults[prefix + "-" + b] || 0) - (gameResults[prefix + "-" + a] || 0); }).map(function (team, index) { return "<div class=\"standing-row\"><b>" + (index + 1) + "º</b><strong>" + teamLabel(team) + "</strong><span>" + (gameResults[prefix + "-" + team] || 0) + " vitórias</span></div>"; }).join(""); };
@@ -153,7 +155,7 @@
       } else {
         typeLabel = "bateria única com 6 equipes";
         const order = orderFor("ordem", teams);
-        visual = "<div class=\"bracket-flow\"><div class=\"bracket-column all-teams\"><span class=\"heat-label\">Largada · arraste para ordenar</span>" + orderLane("ordem de chegada", "ordem", order) + "</div><div class=\"bracket-arrow\">→</div>" + finalSlots([{ team: order[0], label: "1º lugar" }, { team: order[1], label: "2º lugar" }, { team: order[2], label: "3º lugar" }]) + "</div>";
+        visual = "<div class=\"bracket-flow\"><div class=\"bracket-column all-teams\"><span class=\"heat-label\">Largada · arraste para ordenar</span>" + orderLane("ordem de chegada", "ordem", order) + "</div><div class=\"bracket-arrow\">→</div>" + finalSlots(order.map(function (team, index) { return { team: team, label: placementLabels[index] + " lugar" }; })) + "</div>";
       }
       return "<div class=\"format-card\"><div class=\"format-card-header\"><div><strong>Chaveamento</strong><span>" + typeLabel + "</span></div><span class=\"weight-tag\">peso " + game.peso + "</span></div>" + visual + "</div>";
       }());
@@ -185,21 +187,22 @@
     const gameResults = bracketResults[game.id] || {};
     let placements;
     if (game.chaveamento === "bateria-unica") {
-      placements = (gameResults.ordem || []).slice(0, 3);
+      placements = (gameResults.ordem || []).slice(0, 6);
     } else if (game.chaveamento === "grupos-final-4") {
       const orderA = gameResults["ordem-a"] || [];
       const orderB = gameResults["ordem-b"] || [];
       const finalists = [orderA[0], orderA[1], orderB[0], orderB[1]];
-      placements = (gameResults["ordem-final"] || finalists).slice(0, 3);
+      const finalOrder = (gameResults["ordem-final"] || finalists).slice(0, 4);
+      placements = finalOrder.concat(orderA[2], orderB[2]);
     } else {
       const finalWinner = gameResults.final;
       const championA = winnerOfGroup(teams.slice(0, 3), "a", gameResults);
       const championB = winnerOfGroup(teams.slice(3), "b", gameResults);
       const finalLoser = finalWinner === championA ? championB : championA;
       const remaining = teams.filter(function (team) { return team !== finalWinner && team !== finalLoser; }).sort(function (a, b) { return groupWins(b, gameResults) - groupWins(a, gameResults); });
-      placements = [finalWinner, finalLoser, remaining[0]];
+      placements = [finalWinner, finalLoser].concat(remaining);
     }
-    if (placements.every(Boolean) && new Set(placements).size === 3) {
+    if (placements.length === 6 && placements.every(Boolean) && new Set(placements).size === 6) {
       results[game.id] = { placements: placements, finalized: Boolean(results[game.id] && results[game.id].finalized), updatedAt: new Date().toISOString() };
       saveResults();
     }
@@ -208,7 +211,12 @@
   function groupWins(team, gameResults) { return ["a-1", "a-2", "a-3", "b-1", "b-2", "b-3"].reduce(function (total, key) { return total + (gameResults[key] === team ? 1 : 0); }, 0); }
   function winnerOfGroup(groupTeams, prefix, gameResults) { return groupTeams.slice().sort(function (a, b) { return groupWins(b, gameResults) - groupWins(a, gameResults); })[0]; }
 
-  function render() { renderGameSections(); renderRanking(); renderResults(); renderRoster(); renderCompetitors(); renderFormats(); }
+  function render() {
+    elements.pointsLegend.innerHTML = placementLabels.map(function (label, index) {
+      return "<span>" + label + " " + basePoints[placementKeys[index]] + " pts</span>";
+    }).join("");
+    renderGameSections(); renderRanking(); renderResults(); renderRoster(); renderCompetitors(); renderFormats();
+  }
 
   document.getElementById("saveRoster").addEventListener("click", function () {
     const imported = parseRoster(setupElements.rosterInput.value);
