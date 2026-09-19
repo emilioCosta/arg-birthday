@@ -139,8 +139,8 @@
         const wins = groupTeams.map(function (team) { return gameResults[prefix + "-" + team] || 0; });
         const highestWins = Math.max.apply(null, wins);
         const tiedTeams = groupTeams.filter(function (team) { return (gameResults[prefix + "-" + team] || 0) === highestWins; });
-        if (highestWins < 1 || tiedTeams.length < 2 || gameResults["desempate-" + prefix]) return "";
-        return "<div class=\"tie-break\"><b>Empate no grupo</b><span>Faça o dois ou um e marque quem avança:</span><div>" + tiedTeams.map(function (team) { return "<button type=\"button\" class=\"match-pill\" style=\"--team-color:" + teamColors[team] + "\" data-tiebreak-game=\"" + game.id + "\" data-tiebreak-key=\"desempate-" + prefix + "\" data-tiebreak-team=\"" + team + "\"><strong>Equipe " + teamLabel(team) + " avança</strong></button>"; }).join("") + "</div></div>";
+        if (highestWins < 1 || tiedTeams.length < 2) return "";
+        return "<div class=\"tie-break\"><b>Empate no grupo</b><span>Faça o dois ou um e marque quem avança:</span><div>" + tiedTeams.map(function (team) { const selected = gameResults["desempate-" + prefix] === team ? " selected" : ""; return "<button type=\"button\" class=\"match-pill" + selected + "\" style=\"--team-color:" + teamColors[team] + "\" data-tiebreak-game=\"" + game.id + "\" data-tiebreak-key=\"desempate-" + prefix + "\" data-tiebreak-team=\"" + team + "\"><strong>Equipe " + teamLabel(team) + " avança</strong></button>"; }).join("") + "</div></div>";
       };
       const tieBreakComplete = function (groupTeams, prefix) {
         const wins = groupTeams.map(function (team) { return gameResults[prefix + "-" + team] || 0; });
