@@ -50,3 +50,4 @@ h1, h2 { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing
 .tie-controls > span { color: var(--muted); font-size: 9px; font-weight: 700; text-transform: uppercase; }
 .tie-toggle { padding: 5px 7px; border: 1px solid var(--line); border-radius: 999px; background: white; color: var(--muted); cursor: pointer; font: inherit; font-size: 9px; }
 .tie-toggle:hover, .tie-toggle.selected { border-color: var(--green); background: #e1f0e4; color: var(--green); }
+.classification-lane { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }

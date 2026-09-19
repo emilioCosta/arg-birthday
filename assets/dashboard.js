@@ -179,6 +179,9 @@
         const order = orderFor("ordem", teams);
         visual = "<div class=\"bracket-flow\"><div class=\"bracket-column all-teams\"><span class=\"heat-label\">Largada · arraste para ordenar</span>" + orderLane("ordem de chegada", "ordem", order) + "</div><div class=\"bracket-arrow\">→</div>" + finalSlots(order.map(function (team, index) { return { team: team, label: rankAt(gameResults, "ordem", order, index) + "º lugar" }; })) + "</div>";
       }
+      if (game.chaveamento === "todos-contra-todos-final") {
+        visual += "<div class=\"classification-lane\">" + orderLane("classificação final · arraste e marque empates", "ordem-final", teams) + "</div>";
+      }
       return "<div class=\"format-card\"><div class=\"format-card-header\"><div><strong>Chaveamento</strong><span>" + typeLabel + "</span></div><span class=\"weight-tag\">peso " + game.peso + "</span></div>" + visual + "</div>";
       }());
     });
@@ -222,12 +225,18 @@
       if (orderA[2]) ranks[orderA[2]] = 5;
       if (orderB[2]) ranks[orderB[2]] = 6;
     } else {
+      const savedFinalOrder = gameResults["ordem-final"];
+      if (savedFinalOrder && savedFinalOrder.length === 6 && savedFinalOrder.every(function (team) { return teams.includes(team); })) {
+        placements = savedFinalOrder.slice();
+        placements.forEach(function (team, index) { ranks[team] = rankAt(gameResults, "ordem-final", placements, index); });
+      } else {
       const finalWinner = gameResults.final;
       const championA = winnerOfGroup(teams.slice(0, 3), "a", gameResults);
       const championB = winnerOfGroup(teams.slice(3), "b", gameResults);
       const finalLoser = finalWinner === championA ? championB : championA;
       const remaining = teams.filter(function (team) { return team !== finalWinner && team !== finalLoser; }).sort(function (a, b) { return groupWins(b, gameResults) - groupWins(a, gameResults); });
       placements = [finalWinner, finalLoser].concat(remaining);
+      }
     }
     if (placements.length === 6 && placements.every(Boolean) && new Set(placements).size === 6) {
       results[game.id] = { placements: placements, ranks: ranks, finalized: Boolean(results[game.id] && results[game.id].finalized), updatedAt: new Date().toISOString() };
