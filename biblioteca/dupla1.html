@@ -45,6 +45,17 @@
         Mas apenas um deles conhece o caminho para a birita.
       </p>
     </div>
+
+    <form class="biblioteca-busca" id="bibliotecaBusca">
+      <label for="buscaAutor">Buscar no acervo</label>
+      <div class="biblioteca-busca-linha">
+        <input id="buscaAutor" type="search" placeholder="Procure por seu autor..." autocomplete="off">
+        <button type="submit">
+          <span class="biblioteca-busca-icone" aria-hidden="true">⌕</span>
+        </button>
+      </div>
+      <p class="biblioteca-busca-status" id="buscaStatus" aria-live="polite"></p>
+    </form>
     
     <div class="estante" id="estante"></div>
     
@@ -82,9 +93,13 @@
       return Math.random() - 0.5;
     });
     const autorChave = ARG_CONFIG.duplas[duplaAtual].autorChave;
+    const respostaCruzada = ARG_CONFIG.duplas[duplaAtual].respostaCruzada;
     const instagramLink = ARG_CONFIG.duplas[duplaAtual].instagram;
     const livrosConteudo = ARG_CONFIG.livrosConteudo;
     const autoresFotos = ARG_CONFIG.autoresFotos;
+    const bibliotecaBusca = document.getElementById('bibliotecaBusca');
+    const buscaAutor = document.getElementById('buscaAutor');
+    const buscaStatus = document.getElementById('buscaStatus');
     
     const estante = document.getElementById('estante');
     const livroLeitor = document.getElementById('livroLeitor');
@@ -100,7 +115,30 @@
     let autorAtual = '';
     
     // Criar livros na estante
-    autores.forEach(function(autor) {
+    function normalizar(texto) {
+      return texto.trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function palavras(texto) {
+      return normalizar(texto).split(/\s+/).filter(Boolean);
+    }
+
+    function renderizarAutores(termo) {
+      const palavrasBusca = palavras(termo);
+      const palavrasRequeridas = new Set(palavras(respostaCruzada));
+      const respostaCerta = palavrasRequeridas.size > 0 && [...palavrasRequeridas].every(function(palavra) {
+        return palavrasBusca.includes(palavra);
+      });
+      const autoresVisiveis = autores.filter(function(autor) {
+        if (autor === autorChave) return respostaCerta === true;
+        return !palavrasBusca.length || palavrasBusca.every(function(palavra) {
+          return palavras(autor).some(function(nome) {
+            return nome.includes(palavra);
+          });
+        });
+      });
+      estante.replaceChildren();
+      autoresVisiveis.forEach(function(autor) {
       const livro = document.createElement('div');
       livro.className = 'livro';
       livro.innerHTML = `
@@ -115,6 +153,21 @@
       });
       
       estante.appendChild(livro);
+      });
+      buscaStatus.textContent = termo && respostaCerta
+        ? 'Arquivo-chave encontrado.'
+        : autoresVisiveis.length ? '' : 'Nenhum arquivo encontrado.';
+    }
+
+    renderizarAutores('');
+
+    bibliotecaBusca.addEventListener('submit', function(evento) {
+      evento.preventDefault();
+      renderizarAutores(buscaAutor.value);
+    });
+
+    buscaAutor.addEventListener('input', function() {
+      renderizarAutores(buscaAutor.value);
     });
 
     function carregarRetrato(imagem, autor) {
@@ -122,6 +175,17 @@
       if (!pagina) {
         imagem.parentElement.hidden = true;
         return;
+      }
+
+      const cacheKey = `arg_retrato_${pagina}`;
+      try {
+        const retratoCacheado = localStorage.getItem(cacheKey);
+        if (retratoCacheado) {
+          imagem.src = retratoCacheado;
+          return;
+        }
+      } catch (erro) {
+        // O cache e opcional quando o navegador bloqueia armazenamento.
       }
 
       fetch(`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(pagina)}`)
@@ -132,6 +196,7 @@
             return;
           }
           imagem.src = dados.thumbnail.source;
+          try { localStorage.setItem(cacheKey, dados.thumbnail.source); } catch (erro) { /* cache opcional */ }
         })
         .catch(function() { imagem.parentElement.hidden = true; });
     }

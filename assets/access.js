@@ -29,6 +29,7 @@ const ARG_ACCESS = {
   startTeam(team) {
     sessionStorage.setItem('arg_team', team);
     sessionStorage.removeItem('arg_library');
+    sessionStorage.removeItem('arg_location_solved');
     sessionStorage.removeItem('arg_final');
   },
 

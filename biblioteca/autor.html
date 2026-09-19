@@ -64,8 +64,26 @@
         document.getElementById(containerId).hidden = true;
       }
 
-      fetch(`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(paginaWikipedia)}`)
-        .then(function(resposta) { return resposta.ok ? resposta.json() : null; })
+      const resumoCacheKey = `arg_resumo_${paginaWikipedia}`;
+      let resumoCacheado = null;
+      try {
+        resumoCacheado = JSON.parse(localStorage.getItem(resumoCacheKey) || 'null');
+      } catch (erro) {
+        resumoCacheado = null;
+      }
+
+      const resumoAutor = resumoCacheado
+        ? Promise.resolve(resumoCacheado)
+        : fetch(`https://pt.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(paginaWikipedia)}`)
+          .then(function(resposta) { return resposta.ok ? resposta.json() : null; })
+          .then(function(dados) {
+            if (dados) {
+              try { localStorage.setItem(resumoCacheKey, JSON.stringify(dados)); } catch (erro) { /* cache opcional */ }
+            }
+            return dados;
+          });
+
+      resumoAutor
         .then(function(dados) {
           if (!dados) return;
           document.getElementById('autorDescricao').textContent = dados.extract || 'Registro biografico indisponivel.';
@@ -79,12 +97,27 @@
         .catch(function() { esconder('retratoContainer'); });
 
       if (obra) {
-        fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(obra.titulo)}&author=${encodeURIComponent(autor)}&limit=1`)
-          .then(function(resposta) { return resposta.ok ? resposta.json() : null; })
-          .then(function(dados) {
-            const capa = dados && dados.docs && dados.docs[0] && dados.docs[0].cover_i;
-            if (capa) {
-              document.getElementById('obraImagem').src = `https://covers.openlibrary.org/b/id/${capa}-L.jpg`;
+        const capaCacheKey = `arg_capa_${autor}_${obra.titulo}`;
+        let capaCacheada = null;
+        try { capaCacheada = localStorage.getItem(capaCacheKey); } catch (erro) { capaCacheada = null; }
+
+        const capaObra = capaCacheada
+          ? Promise.resolve(capaCacheada)
+          : fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(obra.titulo)}&author=${encodeURIComponent(autor)}&limit=1`)
+            .then(function(resposta) { return resposta.ok ? resposta.json() : null; })
+            .then(function(dados) {
+              const capa = dados && dados.docs && dados.docs[0] && dados.docs[0].cover_i;
+              const urlCapa = capa ? `https://covers.openlibrary.org/b/id/${capa}-L.jpg` : null;
+              if (urlCapa) {
+                try { localStorage.setItem(capaCacheKey, urlCapa); } catch (erro) { /* cache opcional */ }
+              }
+              return urlCapa;
+            });
+
+        capaObra
+          .then(function(urlCapa) {
+            if (urlCapa) {
+              document.getElementById('obraImagem').src = urlCapa;
             } else {
               esconder('obraImagemContainer');
             }

@@ -99,6 +99,11 @@ const ARG_LOCATION_PUZZLE = {
         coordinatesOutput.appendChild(item);
       });
       reward.hidden = false;
+      sessionStorage.setItem('arg_location_solved', 'true');
+      const libraryLink = document.getElementById('libraryLink');
+      if (libraryLink) {
+        libraryLink.hidden = false;
+      }
       board.setAttribute('aria-hidden', 'true');
       board.hidden = true;
       board.style.pointerEvents = 'none';

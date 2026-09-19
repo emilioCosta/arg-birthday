@@ -36,10 +36,10 @@ const ARG_CONFIG = {
   // Obtenha as coordenadas no Google Maps clicando com o botão direito no local desejado
   coordenadas: {
     azul:    "-22.8894743,-47.0433711",
-    verde:   "[PREENCHER: LAT,LONG - exemplo: -22.912345,-47.123456]",
+    verde:   "-22.8765849,-47.0594802",
     amarela: "-20.1410838,-50.9982535",
     roxa:    "-22.884808,-47.0627155",
-    laranja: "[PREENCHER: LAT,LONG - exemplo: -22.912345,-47.123456]",
+    laranja: "-22.5683716,-47.3508743",
     vermelha: "-23.6012628,-46.7201462",
   },
 
@@ -50,14 +50,17 @@ const ARG_CONFIG = {
   duplas: {
     dupla1: {
       autorChave: "Machado de Assis",
+      respostaCruzada: "Machado Assis",
       instagram:  "https://www.instagram.com/assis_machadao/"
     },
     dupla2: {
       autorChave: "Julia Lopes de Almeida",
+      respostaCruzada: "Lopes Almeida",
       instagram:  "https://www.instagram.com/almeida_lopao/"
     },
     dupla3: {
       autorChave: "Carlos Drummond de Andrade",
+      respostaCruzada: "Carlos Drummond",
       instagram:  "https://www.instagram.com/drummond_carlao/"
     },
   },
@@ -80,7 +83,15 @@ const ARG_CONFIG = {
     "João Cabral de Melo Neto",
     "Mário de Andrade",
     "Lygia Fagundes Telles",
-    "Julia Lopes de Almeida"
+    "Julia Lopes de Almeida",
+    "William Shakespeare",
+    "Jane Austen",
+    "Charles Dickens",
+    "Leo Tolstoy",
+    "Fyodor Dostoevsky",
+    "Franz Kafka",
+    "Virginia Woolf",
+    "Edgar Allan Poe"
   ],
 
   // Titulos na Wikipedia usados para buscar retratos publicos dos autores.
@@ -100,7 +111,15 @@ const ARG_CONFIG = {
     "João Cabral de Melo Neto": "João_Cabral_de_Melo_Neto",
     "Mário de Andrade": "Mário_de_Andrade",
     "Lygia Fagundes Telles": "Lygia_Fagundes_Telles",
-    "Julia Lopes de Almeida": "Julia_Lopes_de_Almeida"
+    "Julia Lopes de Almeida": "Julia_Lopes_de_Almeida",
+    "William Shakespeare": "William_Shakespeare",
+    "Jane Austen": "Jane_Austen",
+    "Charles Dickens": "Charles_Dickens",
+    "Leo Tolstoy": "Leo_Tolstoy",
+    "Fyodor Dostoevsky": "Fyodor_Dostoevsky",
+    "Franz Kafka": "Franz_Kafka",
+    "Virginia Woolf": "Virginia_Woolf",
+    "Edgar Allan Poe": "Edgar_Allan_Poe"
   },
 
   // Frase-chave final (mesma para todas as equipes)
@@ -300,6 +319,102 @@ const ARG_CONFIG = {
         {
           titulo: "Romance e Sociedade",
           conteudo: "Julia Lopes de Almeida abordava em seus romances as questões sociais de sua época, refletindo sobre a moral, os costumes e as transformações da sociedade brasileira."
+        }
+      ]
+    },
+    "William Shakespeare": {
+      paginas: [
+        {
+          titulo: "Hamlet",
+          conteudo: "A tragédia acompanha o príncipe Hamlet diante do luto, da dúvida e da responsabilidade de confrontar uma verdade familiar. A peça explora memória, aparência, vingança e consciência."
+        },
+        {
+          titulo: "Sobre o Autor",
+          conteudo: "William Shakespeare foi dramaturgo, poeta e ator inglês. Suas peças e sonetos influenciaram profundamente a literatura, o teatro e a língua inglesa."
+        }
+      ]
+    },
+    "Jane Austen": {
+      paginas: [
+        {
+          titulo: "Orgulho e Preconceito",
+          conteudo: "Elizabeth Bennet enfrenta julgamentos sociais, expectativas familiares e seus próprios preconceitos enquanto observa com ironia as relações da sociedade inglesa."
+        },
+        {
+          titulo: "Sobre a Autora",
+          conteudo: "Jane Austen foi uma romancista inglesa conhecida por sua ironia, precisão psicológica e crítica aos costumes e às relações de classe."
+        }
+      ]
+    },
+    "Charles Dickens": {
+      paginas: [
+        {
+          titulo: "Grandes Esperanças",
+          conteudo: "Pip narra sua transformação de aprendiz humilde a jovem de grandes expectativas, descobrindo que riqueza, aparência e pertencimento não garantem caráter."
+        },
+        {
+          titulo: "Sobre o Autor",
+          conteudo: "Charles Dickens foi um escritor inglês da era vitoriana. Seus romances combinaram crítica social, humor, melodrama e personagens memoráveis."
+        }
+      ]
+    },
+    "Leo Tolstoy": {
+      paginas: [
+        {
+          titulo: "Guerra e Paz",
+          conteudo: "A narrativa acompanha famílias russas durante as guerras napoleônicas, misturando histórias íntimas, transformações sociais e reflexões sobre a história."
+        },
+        {
+          titulo: "Sobre o Autor",
+          conteudo: "Liev Tolstói foi um escritor russo reconhecido pela profundidade moral, pela observação da vida social e por romances de grande escala."
+        }
+      ]
+    },
+    "Fyodor Dostoevsky": {
+      paginas: [
+        {
+          titulo: "Crime e Castigo",
+          conteudo: "Raskólnikov tenta justificar um crime por uma teoria moral, mas é conduzido por culpa, isolamento e confronto interior a reconsiderar suas ideias."
+        },
+        {
+          titulo: "Sobre o Autor",
+          conteudo: "Fiódor Dostoiévski foi romancista e filósofo russo. Sua obra investiga culpa, liberdade, fé, sofrimento e os conflitos da consciência humana."
+        }
+      ]
+    },
+    "Franz Kafka": {
+      paginas: [
+        {
+          titulo: "A Metamorfose",
+          conteudo: "Gregor Samsa acorda transformado em um ser estranho e passa a observar, de dentro do quarto, a fragilidade dos vínculos familiares e da identidade."
+        },
+        {
+          titulo: "Sobre o Autor",
+          conteudo: "Franz Kafka foi um escritor de língua alemã nascido em Praga. Sua ficção combina situações absurdas, burocracias incompreensíveis e inquietação existencial."
+        }
+      ]
+    },
+    "Virginia Woolf": {
+      paginas: [
+        {
+          titulo: "Mrs Dalloway",
+          conteudo: "Ao preparar uma festa em Londres, Clarissa Dalloway percorre lembranças, encontros e pensamentos que revelam a passagem do tempo e as camadas da vida interior."
+        },
+        {
+          titulo: "Sobre a Autora",
+          conteudo: "Virginia Woolf foi uma escritora inglesa modernista. Sua prosa explorou consciência, memória, tempo e as experiências sociais das mulheres."
+        }
+      ]
+    },
+    "Edgar Allan Poe": {
+      paginas: [
+        {
+          titulo: "O Corvo",
+          conteudo: "Um visitante misterioso interrompe a noite de um homem enlutado, transformando a sala em um espaço de memória, repetição e assombro."
+        },
+        {
+          titulo: "Sobre o Autor",
+          conteudo: "Edgar Allan Poe foi escritor, poeta e crítico norte-americano. É uma figura central do romantismo sombrio, da ficção gótica e do conto policial."
         }
       ]
     }
