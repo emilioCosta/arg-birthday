@@ -42,9 +42,10 @@
   const placementKeys = ["primeiro", "segundo", "terceiro", "quarto", "quinto", "sexto"];
   const placementLabels = ["1º", "2º", "3º", "4º", "5º", "6º"];
   function pointsFor(game, placement) { return basePoints[placement] * game.peso; }
-  function tiedWithPrevious(gameResults, key, team) { return (gameResults["empates-" + key] || []).includes(team); }
+  function rankForValue(values, value) {
+    return values.findIndex(function (item) { return item === value; }) + 1;
+  }
   function rankAt(gameResults, key, order, index) {
-    if (index > 0 && tiedWithPrevious(gameResults, key, order[index])) return rankAt(gameResults, key, order, index - 1);
     return index + 1;
   }
 
@@ -137,19 +138,18 @@
       const orderFor = function (key, availableTeams) { const savedOrder = gameResults[key]; return savedOrder && savedOrder.length === availableTeams.length && savedOrder.every(function (team) { return availableTeams.includes(team); }) ? savedOrder : availableTeams; };
       const orderLane = function (label, key, availableTeams) {
         const order = orderFor(key, availableTeams);
-        const ties = gameResults["empates-" + key] || [];
-        return "<div class=\"order-lane\"><span>" + label + "</span><div class=\"order-list\" data-order-game=\"" + game.id + "\" data-order-key=\"" + key + "\">" + order.map(function (team, index) { return "<button type=\"button\" draggable=\"true\" class=\"order-team\" data-order-team=\"" + team + "\" style=\"--team-color:" + teamColors[team] + "\"><b>" + rankAt(gameResults, key, order, index) + "</b><i>" + teamLabel(team).charAt(0) + "</i><span><strong>" + teamLabel(team) + "</strong><small>" + participantsFor(team) + "</small></span><em>arraste</em></button>"; }).join("") + "</div><div class=\"tie-controls\"><span>Empates:</span>" + order.slice(1).map(function (team) { const selected = ties.includes(team) ? " selected" : ""; return "<button type=\"button\" class=\"tie-toggle" + selected + "\" data-tie-order-game=\"" + game.id + "\" data-tie-order-key=\"" + key + "\" data-tie-order-team=\"" + team + "\">" + teamLabel(team) + " com anterior</button>"; }).join("") + "</div></div>";
+        return "<div class=\"order-lane\"><span>" + label + "</span><div class=\"order-list\" data-order-game=\"" + game.id + "\" data-order-key=\"" + key + "\">" + order.map(function (team, index) { return "<button type=\"button\" draggable=\"true\" class=\"order-team\" data-order-team=\"" + team + "\" style=\"--team-color:" + teamColors[team] + "\"><b>" + (index + 1) + "</b><i>" + teamLabel(team).charAt(0) + "</i><span><strong>" + teamLabel(team) + "</strong><small>" + participantsFor(team) + "</small></span><em>arraste</em></button>"; }).join("") + "</div></div>";
       };
       const finalSlots = function (slots) { return "<div class=\"final-column\"><span class=\"stage-label\">CLASSIFICAÇÃO FINAL</span>" + slots.map(function (slot) { const team = slot.team || gameResults[slot.key]; return team ? "<div class=\"final-slot filled\" style=\"--team-color:" + teamColors[team] + "\"><strong>" + slot.label + " · " + teamLabel(team) + "</strong><small>" + participantsFor(team) + "</small></div>" : "<div class=\"final-slot\"><strong>" + slot.label + "</strong><small>ordem ainda não definida</small></div>"; }).join("") + "</div>"; };
       const match = function (first, second, key) { const winner = gameResults[key]; return "<div class=\"match\"><button type=\"button\" class=\"match-pill" + (winner === first ? " selected" : "") + "\" style=\"--team-color:" + teamColors[first] + "\" data-bracket-game=\"" + game.id + "\" data-bracket-key=\"" + key + "\" data-bracket-team=\"" + first + "\"><strong>" + teamLabel(first) + "</strong><small>" + participantsFor(first) + "</small></button><b class=\"match-x\">×</b><button type=\"button\" class=\"match-pill" + (winner === second ? " selected" : "") + "\" style=\"--team-color:" + teamColors[second] + "\" data-bracket-game=\"" + game.id + "\" data-bracket-key=\"" + key + "\" data-bracket-team=\"" + second + "\"><strong>" + teamLabel(second) + "</strong><small>" + participantsFor(second) + "</small></button></div>"; };
       const finalOrder = function (finalTeams) { return orderFor("ordem-final", finalTeams); };
-      const standings = function (groupTeams, prefix) { return groupTeams.slice().sort(function (a, b) { return (gameResults[prefix + "-" + b] || 0) - (gameResults[prefix + "-" + a] || 0); }).map(function (team, index) { return "<div class=\"standing-row\"><b>" + (index + 1) + "º</b><strong>" + teamLabel(team) + "</strong><span>" + (gameResults[prefix + "-" + team] || 0) + " vitórias</span></div>"; }).join(""); };
+      const standings = function (groupTeams, prefix) { const order = groupTeams.slice().sort(function (a, b) { return (gameResults[prefix + "-" + b] || 0) - (gameResults[prefix + "-" + a] || 0); }); const wins = order.map(function (team) { return gameResults[prefix + "-" + team] || 0; }); return order.map(function (team) { return "<div class=\"standing-row\"><b>" + rankForValue(wins, gameResults[prefix + "-" + team] || 0) + "º</b><strong>" + teamLabel(team) + "</strong><span>" + (gameResults[prefix + "-" + team] || 0) + " vitórias</span></div>"; }).join(""); };
       const tieBreak = function (groupTeams, prefix) {
         const wins = groupTeams.map(function (team) { return gameResults[prefix + "-" + team] || 0; });
         const highestWins = Math.max.apply(null, wins);
         const tiedTeams = groupTeams.filter(function (team) { return (gameResults[prefix + "-" + team] || 0) === highestWins; });
         if (highestWins < 1 || tiedTeams.length < 2) return "";
-        return "<div class=\"tie-break\"><b>Empate no grupo</b><span>Faça o dois ou um e marque quem avança:</span><div>" + tiedTeams.map(function (team) { const selected = gameResults["desempate-" + prefix] === team ? " selected" : ""; return "<button type=\"button\" class=\"match-pill" + selected + "\" style=\"--team-color:" + teamColors[team] + "\" data-tiebreak-game=\"" + game.id + "\" data-tiebreak-key=\"desempate-" + prefix + "\" data-tiebreak-team=\"" + team + "\"><strong>Equipe " + teamLabel(team) + " avança</strong></button>"; }).join("") + "</div></div>";
+        return "<div class=\"tie-break\"><b>Desempate para avanço</b><span>Faça o dois ou um apenas para decidir quem vai à final:</span><div>" + tiedTeams.map(function (team) { const selected = gameResults["desempate-" + prefix] === team ? " selected" : ""; return "<button type=\"button\" class=\"match-pill" + selected + "\" style=\"--team-color:" + teamColors[team] + "\" data-tiebreak-game=\"" + game.id + "\" data-tiebreak-key=\"desempate-" + prefix + "\" data-tiebreak-team=\"" + team + "\"><strong>Equipe " + teamLabel(team) + " avança</strong></button>"; }).join("") + "</div></div>";
       };
       const tieBreakComplete = function (groupTeams, prefix) {
         const wins = groupTeams.map(function (team) { return gameResults[prefix + "-" + team] || 0; });
@@ -178,9 +178,6 @@
         typeLabel = "bateria única com 6 equipes";
         const order = orderFor("ordem", teams);
         visual = "<div class=\"bracket-flow\"><div class=\"bracket-column all-teams\"><span class=\"heat-label\">Largada · arraste para ordenar</span>" + orderLane("ordem de chegada", "ordem", order) + "</div><div class=\"bracket-arrow\">→</div>" + finalSlots(order.map(function (team, index) { return { team: team, label: rankAt(gameResults, "ordem", order, index) + "º lugar" }; })) + "</div>";
-      }
-      if (game.chaveamento === "todos-contra-todos-final") {
-        visual += "<div class=\"classification-lane\">" + orderLane("classificação final · arraste e marque empates", "ordem-final", teams) + "</div>";
       }
       return "<div class=\"format-card\"><div class=\"format-card-header\"><div><strong>Chaveamento</strong><span>" + typeLabel + "</span></div><span class=\"weight-tag\">peso " + game.peso + "</span></div>" + visual + "</div>";
       }());
@@ -236,6 +233,10 @@
       const finalLoser = finalWinner === championA ? championB : championA;
       const remaining = teams.filter(function (team) { return team !== finalWinner && team !== finalLoser; }).sort(function (a, b) { return groupWins(b, gameResults) - groupWins(a, gameResults); });
       placements = [finalWinner, finalLoser].concat(remaining);
+      ranks[finalWinner] = 1;
+      ranks[finalLoser] = 2;
+      const remainingWins = remaining.map(function (team) { return groupWins(team, gameResults); }).sort(function (a, b) { return b - a; });
+      remaining.forEach(function (team) { ranks[team] = 2 + rankForValue(remainingWins, groupWins(team, gameResults)); });
       }
     }
     if (placements.length === 6 && placements.every(Boolean) && new Set(placements).size === 6) {
